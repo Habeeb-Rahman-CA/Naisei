@@ -1,0 +1,17 @@
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/.angular/cache
+
+# Dependencies
+/node_modules
+
+# Subpackage lockfile
+package-lock.json
+
+# IDEs & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

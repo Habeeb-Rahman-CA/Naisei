@@ -1,7 +1,7 @@
 # Naisei (内省)
 
 > **A quiet digital space for your thoughts.**  
-> *Open. Write. Close. Remember.*
+> _Open. Write. Close. Remember._
 
 ---
 
@@ -25,33 +25,35 @@ Every feature, interface element, and architectural decision in Naisei is judged
   - ❌ No strong gradients or vibrant neon colors
   - ❌ No crowded dashboards or analytics tickers
   - ❌ No cluttered icon bars or intimidating formatting palettes
-  - 🌿 Closer to: *Opening a beautiful personal notebook on a wooden desk.*
+  - 🌿 Closer to: _Opening a beautiful personal notebook on a wooden desk._
 
 ### Color Palette
 
-| Token | Light Mode (Warm Paper) | Dark Mode (Night Stationery) | Description |
-| :--- | :--- | :--- | :--- |
-| **Primary Background** | `#F5F1E8` | `#1C1C1A` | Warm ivory paper / Deep slate desk |
-| **Surface** | `#FAF7F0` | `#252522` | Raised page surface |
-| **Primary Text** | `#292824` | `#E8E4DA` | Soft black ink / Warm cream text |
-| **Secondary Text** | `#77736B` | `#9A978F` | Muted graphite for dates, page numbers |
-| **Accent** | `#6F6A9A` | `#8D88C7` | Muted lavender/indigo (used very sparingly) |
+| Token                  | Light Mode (Warm Paper) | Dark Mode (Night Stationery) | Description                                 |
+| :--------------------- | :---------------------- | :--------------------------- | :------------------------------------------ |
+| **Primary Background** | `#F5F1E8`               | `#1C1C1A`                    | Warm ivory paper / Deep slate desk          |
+| **Surface**            | `#FAF7F0`               | `#252522`                    | Raised page surface                         |
+| **Primary Text**       | `#292824`               | `#E8E4DA`                    | Soft black ink / Warm cream text            |
+| **Secondary Text**     | `#77736B`               | `#9A978F`                    | Muted graphite for dates, page numbers      |
+| **Accent**             | `#6F6A9A`               | `#8D88C7`                    | Muted lavender/indigo (used very sparingly) |
 
 ### Typography
+
 - **UI Elements**: Clean, unobtrusive sans-serif (`Inter`, `Geist`).
 - **Journal Writing**: Literary, editorial serifs (`Lora`, `Literata`, `Cormorant Garamond`).  
-  *Reading journal text should feel like reading a personal diary, not an application.*
+  _Reading journal text should feel like reading a personal diary, not an application._
 
 ---
 
 ## 2. The Paper Metaphor
 
 The paper metaphor is the physical and emotional heart of Naisei:
+
 - **MVP Paper Styles**:
   1. **Lined (Default)**: Horizontal ruled lines precisely aligned to writing line-heights.
   2. **Blank**: Unconstrained canvas for free-form reflection.
   3. **Dotted**: Subtle dot-matrix for structured planning, lists, and sketches.
-  *(Grid paper reserved for future releases).*
+     _(Grid paper reserved for future releases)._
 - **Tactile Paper Details**:
   - Warm paper tone with subtle fiber grain/texture (not a generic repeating CSS pattern).
   - Comfortable, authentic margins and soft page depth shadows.
@@ -61,7 +63,7 @@ The paper metaphor is the physical and emotional heart of Naisei:
   - **Desktop**: Clickable page edges / buttons (`← Previous page` / `Next page →`) or arrow keys.
   - **Mobile**: Natural horizontal swipe gestures (`Swipe ←` / `→ Swipe`).
   - **Reduced Motion**: Automatically falls back to a gentle opacity fade/slide for users with motion sensitivity.
-  - *Goal*: "I am turning the page of my journal", never an exaggerated 3D gimmick.
+  - _Goal_: "I am turning the page of my journal", never an exaggerated 3D gimmick.
 
 ---
 
@@ -72,6 +74,7 @@ OPEN ──> TODAY'S PAGE ──> WRITE ──> AUTOSAVE ──> CLOSE ──> R
 ```
 
 ### The Immediate Opening
+
 No loading dashboards or setup barriers. The user launches Naisei and immediately sees:
 
 ```
@@ -132,7 +135,9 @@ No loading dashboards or setup barriers. The user launches Naisei and immediatel
   - Permanent account deletion with complete data purge
 
 ### 🚫 Strictly Postponed (Do Not Build for MVP)
+
 To keep Naisei pure, calm, and distraction-free, the following are explicitly excluded from the MVP:
+
 - ❌ AI writing assistants, AI summaries, or sentiment bots
 - ❌ Social sharing feeds, public links, or collaborative journals
 - ❌ Comments, reactions, or likes
@@ -148,6 +153,7 @@ To keep Naisei pure, calm, and distraction-free, the following are explicitly ex
 ## 5. Desktop & Mobile Wireframe Model
 
 ### Desktop View
+
 A three-column foundation where the **Paper Page visually dominates**. The navigation and entry sidebar tuck away into **Focus Mode** when typing begins:
 
 ```
@@ -166,6 +172,7 @@ A three-column foundation where the **Paper Page visually dominates**. The navig
 ```
 
 ### Mobile PWA View
+
 A focused, distraction-free single-page notebook view with thumb-accessible controls:
 
 ```
@@ -199,22 +206,23 @@ A focused, distraction-free single-page notebook view with thumb-accessible cont
 ## 6. Accessibility & Keyboard Shortcuts
 
 Targeting **WCAG 2.2 AA** conformance:
+
 - Full keyboard navigation with visible, high-contrast focus rings.
 - Minimum 44×44px touch targets.
 - Accessible semantic markup for screen readers.
 - Respect for `prefers-reduced-motion` across page turns.
 - Never relying solely on color to convey status.
 
-| Shortcut | Action |
-| :--- | :--- |
-| `Ctrl / Cmd + N` | New journal entry |
-| `Ctrl / Cmd + S` | Force save / trigger sync |
-| `Ctrl / Cmd + K` | Global search |
-| `Ctrl / Cmd + F` | Find in page |
-| `Ctrl / Cmd + Z` | Undo |
-| `Ctrl / Cmd + Shift + Z` | Redo |
-| `←` / `→` | Previous page / Next page |
-| `Esc` | Exit focus mode / close drawers |
+| Shortcut                 | Action                          |
+| :----------------------- | :------------------------------ |
+| `Ctrl / Cmd + N`         | New journal entry               |
+| `Ctrl / Cmd + S`         | Force save / trigger sync       |
+| `Ctrl / Cmd + K`         | Global search                   |
+| `Ctrl / Cmd + F`         | Find in page                    |
+| `Ctrl / Cmd + Z`         | Undo                            |
+| `Ctrl / Cmd + Shift + Z` | Redo                            |
+| `←` / `→`                | Previous page / Next page       |
+| `Esc`                    | Exit focus mode / close drawers |
 
 ---
 
@@ -246,4 +254,34 @@ Targeting **WCAG 2.2 AA** conformance:
 - **Testing**: Vitest / Jest + Playwright
 - **CI/CD**: GitHub Actions
 
-For implementation rules and developer instructions, see **[INSTRUCTIONS.md](file:///c:/Users/habeebu/Desktop/Habeeb/Personal/Naisei/INSTRUCTIONS.md)**.
+---
+
+## 9. Monorepo Scripts & Quickstart
+
+```bash
+# Install dependencies across all workspaces
+npm install
+
+# Run database migrations
+npm --prefix apps/api run migration:run
+
+# Run the Angular PWA frontend (http://localhost:4200)
+npm run dev:web
+
+# Run the NestJS API backend (http://localhost:3000/api & Swagger http://localhost:3000/api/docs)
+npm run dev:api
+
+# Run linting and formatting across the monorepo
+npm run lint
+npm run format:check
+
+# Run full project build (shared-types -> api -> web)
+npm run build
+```
+
+---
+
+## 📜 Documentation & Guidelines
+
+For exhaustive development guidelines, architectural contracts, UI rules, and coding standards, refer to:
+👉 **[INSTRUCTIONS.md](file:///c:/Users/habeebu/Desktop/Habeeb/Personal/Naisei/INSTRUCTIONS.md)**

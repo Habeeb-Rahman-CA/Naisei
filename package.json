@@ -1,0 +1,32 @@
+{
+  "name": "naisei-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Naisei - A quiet digital space for your thoughts",
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run start",
+    "dev:api": "npm --prefix apps/api run start:dev",
+    "build:types": "npm --prefix libs/shared-types run build",
+    "build:web": "npm --prefix apps/web run build",
+    "build:api": "npm --prefix apps/api run build",
+    "build": "npm run build:types && npm run build:api && npm run build:web",
+    "lint:web": "npm --prefix apps/web run lint --if-present",
+    "lint:api": "npm --prefix apps/api run lint",
+    "lint": "npm run lint:api",
+    "test:web": "npm --prefix apps/web run test -- --watch=false --browsers=ChromeHeadless",
+    "test:api": "npm --prefix apps/api run test",
+    "test": "npm run test:api",
+    "format": "prettier --write \"**/*.{ts,js,json,md,html,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md,html,css}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  }
+}

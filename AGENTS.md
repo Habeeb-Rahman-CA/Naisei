@@ -5,7 +5,9 @@ This document establishes the binding rules for all AI assistants and developers
 ---
 
 ## 1. Core Principle & The Acid Test
+
 Every design, feature, and architectural decision must be evaluated against this single question:
+
 > **"Does this make Naisei feel more like writing in a real journal?"**  
 > • If **yes** → Consider and refine it.  
 > • If **no** → Keep it minimal or discard it.
@@ -13,6 +15,7 @@ Every design, feature, and architectural decision must be evaluated against this
 ---
 
 ## 2. Non-Negotiable UX & Visual Rules
+
 - **Paper-First Mindset**: The app must feel like opening a physical notebook on a desk. Do not clutter the interface with classic productivity app widgets, sidebar clutter, card grids, or invasive formatting bars.
 - **Immediate Writing**: Opening the app must place the user on an active page with the cursor ready immediately. No friction, zero splash modals.
 - **Color System**:
@@ -29,7 +32,9 @@ Every design, feature, and architectural decision must be evaluated against this
 ---
 
 ## 3. Scope Boundaries — Strictly Postponed (Do Not Build for MVP)
+
 Do NOT introduce or propose any of the following features during MVP:
+
 - ❌ AI writing assistants, AI summaries, or sentiment analysis
 - ❌ Social sharing, public profiles, collaboration, or comments
 - ❌ Voice journaling or audio transcription
@@ -40,6 +45,7 @@ Do NOT introduce or propose any of the following features during MVP:
 ---
 
 ## 4. Technical Architecture Rules
+
 - **Frontend**:
   - Angular 19+ with Standalone Components only (`NgModule` is strictly prohibited).
   - Angular Signals (`signal`, `computed`, `effect`) for reactive state.
@@ -61,6 +67,7 @@ Do NOT introduce or propose any of the following features during MVP:
 ---
 
 ## 5. Sync & Conflict Handling Rules
+
 - Sync endpoints must be strictly **idempotent**.
 - Every record must have `client_updated_at` and a monotonic `revision` counter.
 - User data must never be silently overwritten or deleted during sync conflicts; write conflict copies if divergent revisions occur.
@@ -68,5 +75,6 @@ Do NOT introduce or propose any of the following features during MVP:
 ---
 
 ## 6. Documentation References
+
 - **[README.md](file:///c:/Users/habeebu/Desktop/Habeeb/Personal/Naisei/README.md)**: Product vision, tech stack summary, visual identity, and overview.
 - **[INSTRUCTIONS.md](file:///c:/Users/habeebu/Desktop/Habeeb/Personal/Naisei/INSTRUCTIONS.md)**: Full architecture specifications, UX rules, data flow, tokens, and phased roadmap.
