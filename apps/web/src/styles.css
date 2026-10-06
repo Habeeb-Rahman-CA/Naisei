@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-paper-bg: #f5f1e8;
+  --color-paper-surface: #faf7f0;
+  --color-text-primary: #292824;
+  --color-text-secondary: #77736b;
+  --color-accent: #6f6a9a;
+  --color-line-ruled: rgba(119, 115, 107, 0.18);
+  --color-line-dotted: rgba(119, 115, 107, 0.25);
+  --shadow-page: 0 4px 20px -2px rgba(41, 40, 36, 0.06), 0 1px 3px rgba(41, 40, 36, 0.04);
+}
+
+.dark {
+  --color-paper-bg: #1c1c1a;
+  --color-paper-surface: #252522;
+  --color-text-primary: #e8e4da;
+  --color-text-secondary: #9a978f;
+  --color-accent: #8d88c7;
+  --color-line-ruled: rgba(154, 151, 143, 0.14);
+  --color-line-dotted: rgba(154, 151, 143, 0.2);
+  --shadow-page: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Paper Ruled Background Utility */
+.paper-lined {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    var(--color-line-ruled) 31px,
+    var(--color-line-ruled) 32px
+  );
+  line-height: 32px;
+}
+
+/* Paper Dotted Background Utility */
+.paper-dotted {
+  background-image: radial-gradient(var(--color-line-dotted) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Paper Subtle Texture Grain */
+.paper-texture {
+  position: relative;
+}
+
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: radial-gradient(#000 1px, transparent 0);
+  background-size: 4px 4px;
+}
+
+html,
+body {
+  background-color: var(--color-paper-bg);
+  color: var(--color-text-primary);
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
