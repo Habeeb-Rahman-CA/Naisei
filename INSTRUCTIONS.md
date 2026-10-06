@@ -1,212 +1,214 @@
 # Naisei (内省) — Engineering & Architecture Instructions
 
-> **Document Status**: Active Specification & Guidelines  
+> **Document Status**: Active Specification & Guidelines (Phase 0 Complete)  
 > **Target Audience**: Developers, Tech Leads, and AI Pair Programmers  
-> **Scope**: Architecture, UX/UI Design Rules, Data Flow, Coding Standards, and Implementation Protocols
+> **Scope**: Product Identity, UX/UI Laws, Paper Metaphor, Architecture, Data Flow, Coding Standards, and Roadmaps
 
 ---
 
-## 1. Product Vision & UX Design Laws
+## 1. Product Definition & Core Philosophy
 
-### 1.1 The Core Experience
-The defining metric of Naisei is **immediate, tactile immersion**:
-1. **Zero Distraction on Open**:
-   - The user opens the app → the active page is already loaded → the cursor is blinking in place → the user writes immediately.
-   - Never show splash screens that block writing, intrusive modals, onboarding wizards, or dashboard metric cards on initial launch.
-2. **The Physical Notebook Metaphor**:
-   - **Paper Surface**: The writing canvas must feature realistic yet subtle paper characteristics:
-     - Warm off-white / parchment / ivory background tones in light mode (`#FDFBF7`, `#FAF7F2`) and deep ink / slate hues in dark mode (`#1A1A1E`, `#121214`).
-     - Subtle textural noise or fiber grain (CSS gradients / SVGs), fine ruled or grid/dot guides that align with line heights, and authentic margins.
-     - Tactile page depth: gentle page-fold shadows, layered corner stacking, and binding spine illusion.
-   - **Tactile Transitions**: Page turning or swiping between pages must mimic paper movement (smooth physics-based slide, curl, or fade transition) rather than generic app page transitions.
-3. **Invisible & Contextual UI**:
-   - Editing toolbars must remain hidden during active writing.
-   - Rich formatting (bold, italic, headings, lists, quotes) should be accessible via:
-     - Markdown shortcuts (`#`, `*`, `>`, `- `) processed instantly by Tiptap.
-     - Contextual floating/bubble menu that appears only when text is selected.
-   - Navigation bars, drawer toggles, and metadata controls should subtly tuck away or dim into the background while writing (Zen mode).
-4. **PWA-First Excellence**:
-   - Must be fully installable as a Progressive Web App on iOS, Android, macOS, and Windows.
-   - Instant touch responsiveness (<100ms visual response to touch/gestures).
-   - Safe-area insets (`env(safe-area-inset-top)`, `env(safe-area-inset-bottom)`) respected across mobile notches and home indicators.
-   - **No Capacitor initially**: Polish the web PWA to perfection before considering native wrappers.
+### 1.1 The Guiding Principle
+Every architectural decision, feature request, and interface element must pass the **Naisei Core Test**:
+> **"Does this make Naisei feel more like writing in a real journal?"**  
+> • If **yes** → Consider and refine it.  
+> • If **no** → Keep it minimal or discard it.
 
----
+### 1.2 Visual Identity & Aesthetics
+Naisei is designed as: **Minimal · Warm · Personal · Calm · Paper-like**.
+- **Avoid Productivity Clutter**:
+  - No card-heavy dashboards, no bright gradients, no crowded metrics, and no complex persistent editor toolbars.
+  - The sensation must replicate opening a clean, handcrafted notebook on your desk.
 
-## 2. Technology Stack & Layer Responsibilities
+### 1.3 Design System Tokens
 
-### Frontend (Angular 19+)
-- **Architecture**: Standalone components only; `NgModule` is forbidden.
-- **Reactivity**: Angular Signals (`signal()`, `computed()`, `effect()`) for all UI state.
-- **Dependency Injection**: Modern `inject()` syntax; avoid constructor parameter injection.
-- **Template Control Flow**: Modern control flow syntax (`@if`, `@for`, `@switch`, `@defer`).
-- **Styling**: Tailwind CSS with custom paper theme tokens + Angular CDK for overlay, drag-and-drop, and a11y primitives.
+```css
+:root {
+  /* Light Mode (Warm Paper) */
+  --color-paper-bg: #F5F1E8;         /* Warm background paper */
+  --color-paper-surface: #FAF7F0;    /* Elevated notebook page */
+  --color-text-primary: #292824;     /* Soft black ink */
+  --color-text-secondary: #77736B;   /* Muted graphite */
+  --color-accent: #6F6A9A;           /* Muted lavender/indigo (used sparingly) */
+  --color-line-ruled: rgba(119, 115, 107, 0.18); /* Subtle horizontal ruled lines */
+  --color-line-dotted: rgba(119, 115, 107, 0.25);/* Subtle dot matrix */
+  --shadow-page: 0 4px 20px -2px rgba(41, 40, 36, 0.06), 0 1px 3px rgba(41, 40, 36, 0.04);
+}
 
-### Editor (Tiptap + ProseMirror)
-- Headless Tiptap core with custom prose styling.
-- Persist content as structured JSON (ProseMirror node tree) rather than raw HTML to guarantee schema validation and clean diffing.
-- Auto-focus on active page mount.
-- Support markdown input shortcuts natively.
-
-### Offline & Local Storage (Dexie.js / IndexedDB)
-- **Local-First Mandate**: Every keystroke / debounced change writes directly to Dexie within 200–500ms.
-- All reads for the UI come from IndexedDB, making the app 100% functional without internet connectivity.
-- Maintains an explicit `sync_queue` table for offline operations awaiting server synchronization.
-
-### Service Worker & PWA
-- Configured via `@angular/pwa` (`ngsw-config.json`).
-- Aggressive caching for the app shell, fonts, paper textures, and static assets.
-- Clean update notifications ("New version available") without interrupting active writing sessions.
-
-### Backend (NestJS)
-- Modular architecture (`AuthModule`, `JournalsModule`, `SyncModule`, `StorageModule`, `UsersModule`).
-- Fastify or Express engine with strict TypeScript types.
-- Strict DTO validation with `class-validator` and `class-transformer`.
-- Centralized exception filters and structured response logging.
-
-### Database & ORM (PostgreSQL via Neon + TypeORM)
-- Managed Neon PostgreSQL with connection pooling.
-- TypeORM for migrations, relations, and transactional sync processing.
-- JSONB columns for editor block contents and metadata tags.
-
-### Authentication & Security
-- Dual-token strategy: short-lived Access Token (15m) + long-lived Refresh Token (7d) stored in **HttpOnly, Secure, SameSite=Strict** cookies.
-- No tokens stored in `localStorage` or `sessionStorage` (XSS protection).
-- CSRF protection via double-submit cookie or origin header validation.
-
-### Media & Storage (Cloudflare R2)
-- Zero-egress S3-compatible bucket.
-- Presigned upload URLs generated by NestJS backend.
-- Client uploads images directly to R2; editor stores only the immutable URL/key and metadata.
-
----
-
-## 3. Data Integrity & Sync Protocol
-
-### 3.1 Data Flow Pipeline
-```
-1. User Writes in Tiptap
-      │
-2. Component receives state change
-      │
-3. Dexie.js (IndexedDB) updates local 'pages' table (instantly)
-   Dexie.js adds/updates item in 'sync_queue' table
-      │
-4. Background Sync Service checks network status & triggers sync
-      │
-5. HTTP POST /api/sync (batch changes with client timestamps & revisions)
-      │
-6. NestJS processes batch in a database transaction:
-   - Verifies ownership
-   - Checks revision conflicts
-   - Updates PostgreSQL
-   - Returns updated server sync cursor
-      │
-7. Dexie marks queue items as synced / removes them
+.dark {
+  /* Dark Mode (Night Stationery) */
+  --color-paper-bg: #1C1C1A;         /* Deep slate desk */
+  --color-paper-surface: #252522;    /* Dark stationery leaf */
+  --color-text-primary: #E8E4DA;     /* Warm cream text */
+  --color-text-secondary: #9A978F;   /* Soft slate secondary */
+  --color-accent: #8D88C7;           /* Soft muted indigo */
+  --color-line-ruled: rgba(154, 151, 143, 0.14);
+  --color-line-dotted: rgba(154, 151, 143, 0.20);
+  --shadow-page: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
+}
 ```
 
-### 3.2 Key Synchronization Rules
-1. **Client-Generated IDs**:
-   - Primary keys (`id`) must be generated on the client before saving.
-   - Use **UUIDv7** (time-sortable, 128-bit) or collision-proof nanoids. The server must never assign IDs to entries.
-2. **Revision & Timestamp Attributes**:
-   Every syncable entity (`Notebook`, `Page`, `Tag`) must track:
-   - `id`: string (UUIDv7, primary key)
-   - `client_created_at`: ISO timestamp string
-   - `client_updated_at`: ISO timestamp string
-   - `server_updated_at`: ISO timestamp string (assigned by server)
-   - `revision`: integer (monotonically incremented on every local edit)
-   - `is_deleted`: boolean (tombstone flag for soft deletions; never hard-delete during sync)
-3. **Idempotent Operations**:
-   - Any sync request payload can be safely retransmitted multiple times without duplicate record creation or data corruption.
-   - Operations are identified by entity ID and revision.
-4. **Conflict Resolution Strategy**:
-   - Phase 1: **Last-Write-Wins (LWW) with revision verification**.
-   - If a client pushes a lower or divergent revision against an updated server record:
-     - The newer revision takes precedence.
-     - The client's conflicting version is backed up locally as a "conflict copy" page (`[Page Title] - Conflict Copy [Date]`) so user writing is **never silently lost**.
-5. **Decoupled Media Uploads**:
-   - Text saves must never wait for image uploads.
-   - Local placeholders are rendered immediately via `blob:` or object URLs.
-   - The sync worker handles binary uploads in the background and swaps local URI for permanent R2 URI once confirmed.
+### 1.4 Typography Standards
+- **UI Elements**: Unobtrusive, readable modern sans-serifs (`Inter`, `Geist`).
+- **Journal Writing Content**: Literary, elegant serifs (`Lora`, `Literata`, `Cormorant Garamond`).
+  - *The reading and writing experience must feel like a personal diary, not an application UI.*
 
 ---
 
-## 4. Coding Standards & Conventions
+## 2. The Paper Metaphor & Interaction Laws
 
-### 4.1 Frontend (Angular 19+)
-- **Components**:
-  - Must be `standalone: true`.
-  - Prefer `changeDetection: ChangeDetectionStrategy.OnPush` across all components.
-  - Keep components modular: Paper Container, Page Leaf, Margin Ruler, Contextual Toolbar, Notebook Shelf.
-- **State Management**:
-  - Use Angular Signals for reactive UI state (`signal`, `computed`).
-  - Use `resource()` or `toSignal()` for async Dexie operations.
-  - Side effects must be localized inside `effect()` or service worker handlers.
-- **Styling**:
-  - Use semantic Tailwind classes or custom CSS variables for paper themes:
-    - `--paper-bg`, `--paper-line`, `--paper-margin`, `--paper-ink`.
-  - Maintain a strict dark mode palette that emulates dark stationery (e.g. night sketchpad) rather than harsh pure black `#000000`.
+### 2.1 Paper Styles (MVP)
+1. **Lined Paper (Default)**:
+   - Subtle horizontal lines spaced proportionally to font size and line height.
+   - Text baselines must visually snap/align with ruled guides.
+2. **Blank Paper**:
+   - Clean, open page for free-form reflection without guides.
+3. **Dotted Paper**:
+   - Subtle, delicate dot grid for structured notes, sketches, and planning.
 
-### 4.2 Backend (NestJS)
-- **Module Structure**:
-  - Keep modules self-contained: `module.ts`, `controller.ts`, `service.ts`, `dto/`, `entities/`.
-- **Validation**:
-  - Every controller endpoint must consume typed DTOs decorated with `class-validator` rules (`@IsUUID`, `@IsString`, `@IsNotEmpty`, `@IsDateString`).
-- **Database & TypeORM**:
-  - Never run raw, unescaped SQL queries.
-  - Use database migrations for schema evolution (`typeorm migration:generate`).
-  - Use database transactions (`QueryRunner` or `EntityManager.transaction`) for multi-entity sync batches.
+### 2.2 Paper Details
+- **Warm Texture**: Very subtle organic grain/fiber texture (SVG filter or subtle image overlay), avoiding harsh repeating patterns.
+- **Natural Margins**: Generous, comfortable left and right margins that preserve page breathing room across desktop and mobile.
+- **Page Elements**: Date and page number subtly embedded at the top/bottom of the page in secondary ink.
+- **Page Shadow & Spine**: Gentle page depth shadow evoking stacked paper leaves.
 
-### 4.3 Git & Repository Workflows
-- **Commit Messages**: Follow Conventional Commits:
-  - `feat(editor): implement tiptap paper styling extension`
-  - `fix(sync): resolve queue retry race condition on offline reconnect`
-  - `docs(instructions): add revision conflict resolution rules`
-- **Branching**: `main` is production-ready; develop in feature branches (`feat/`, `fix/`, `chore/`).
+### 2.3 Page Turning
+- **Desktop**: Subtle page navigation buttons (`← Previous page` / `Next page →`) or keyboard arrow keys (`←`, `→`).
+- **Mobile Gestures**:
+  - `Swipe Left` → Next page.
+  - `Swipe Right` → Previous page.
+  - `Long Press` → Contextual selection.
+  - `Pull Down` → Refresh sync status.
+- **Reduced Motion**: If the user or OS has `prefers-reduced-motion` enabled, animate via simple opacity slide/fade rather than spatial page turning.
 
 ---
 
-## 5. Implementation Roadmap & Execution Phases
+## 3. Product Scope & Boundary Rules
+
+### 3.1 MVP Must-Haves
+- **Writing**:
+  - Instant focus on active page on app launch.
+  - Create, view, edit, and delete entries.
+  - Tiptap rich text (bold, italic, lists, quotes, headings) styled with editorial serif typography.
+  - Transparent autosave (no explicit "Save" button required). Status indicator: `Saved`, `Saving...`, `Offline`.
+  - Undo and redo history.
+- **Organization**:
+  - Chronological entry list.
+  - Calendar picker & date navigator.
+  - Fast search by title/content and tag filtering.
+  - Favorites and Trash (with restore support).
+- **Offline & Local-First**:
+  - IndexedDB storage via Dexie.js.
+  - Seamless background synchronization when online.
+  - Service Worker offline PWA caching.
+- **Account & Security**:
+  - User signup, login, logout.
+  - Isolated user journals with HttpOnly Secure cookies.
+- **Data Ownership**:
+  - Markdown and JSON export for all or individual entries.
+  - Full account and data deletion.
+
+### 3.2 Explicitly Postponed (Forbidden for MVP)
+To maintain focus and avoid feature bloat, do NOT implement:
+- 🚫 AI assistants, summaries, auto-completions, or sentiment analysis.
+- 🚫 Social feeds, public sharing, or collaborative multi-user editing.
+- 🚫 Comments, likes, or social reactions.
+- 🚫 Voice recording or audio transcription.
+- 🚫 Gamification, streak badges, or complex analytics.
+- 🚫 Paywalls, subscriptions, or Stripe integration.
+- 🚫 Native app store wrappers (Capacitor/Cordova) — prioritize PWA first.
+- 🚫 Heavy 3D skeuomorphic page turns or complex media asset management.
+
+---
+
+## 4. Accessibility & Keyboard Shortcuts
+
+Target: **WCAG 2.2 AA Compliance**.
+- All interactive controls must have accessible names and visible focus states.
+- Color alone must never convey state (e.g. sync status indicators must include accessible text or icons).
+- Minimum touch target: 44×44px.
+- Text contrast must exceed 4.5:1 for normal text and 3:1 for large/graphical elements.
+
+### Keyboard Shortcuts Table
+| Shortcut | Action |
+| :--- | :--- |
+| `Ctrl / Cmd + N` | Create new entry |
+| `Ctrl / Cmd + S` | Force save / trigger sync |
+| `Ctrl / Cmd + K` | Global search dialog |
+| `Ctrl / Cmd + F` | Find in current page |
+| `Ctrl / Cmd + Z` | Undo |
+| `Ctrl / Cmd + Shift + Z` | Redo |
+| `←` (Arrow Left) | Previous page |
+| `→` (Arrow Right) | Next page |
+| `Esc` | Exit focus mode / close drawers |
+
+---
+
+## 5. Architecture & Data Integrity Rules
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ Phase 1: Architecture, Shared Contracts & Dexie Setup  │
-├────────────────────────────────────────────────────────┤
-│ Phase 2: Tactile Paper UI & Tiptap Editor Engine       │
-├────────────────────────────────────────────────────────┤
-│ Phase 3: PWA Shell, Offline Storage & Gestures         │
-├────────────────────────────────────────────────────────┤
-│ Phase 4: NestJS Backend, PostgreSQL & Auth             │
-├────────────────────────────────────────────────────────┤
-│ Phase 5: Idempotent Sync Engine & Conflict Handler     │
-├────────────────────────────────────────────────────────┤
-│ Phase 6: Cloudflare R2 Media Attachments & Polish      │
+│                      Client Layer                      │
+│                                                        │
+│   [ User Typing ] ──> [ Tiptap Editor State ]          │
+│                                │                       │
+│                                ▼                       │
+│                  [ Dexie / IndexedDB Store ]           │
+│                 (Immediate local save, <5ms)           │
+│                                │                       │
+│                                ▼                       │
+│                     [ Sync Queue Engine ]              │
+└───────────────────────────────┬────────────────────────┘
+                                │ (Background HTTP/Sync)
+                                ▼
+┌────────────────────────────────────────────────────────┐
+│                      Server Layer                      │
+│                                                        │
+│                  [ NestJS Sync Controller ]            │
+│                                │                       │
+│                                ▼                       │
+│                [ Idempotent Conflict Resolver ]        │
+│                                │                       │
+│                                ▼                       │
+│                 [ PostgreSQL (Neon) Database ]         │
 └────────────────────────────────────────────────────────┘
 ```
 
-### Detailed Breakdown:
-1. **Phase 1: Workspace Setup & Shared Models**
-   - Initialize monorepo workspace (Angular frontend, NestJS backend, shared library).
-   - Define shared interfaces: `Journal`, `Page`, `SyncPayload`, `SyncBatchResponse`.
-   - Setup Dexie database schema and client UUIDv7 generation.
-2. **Phase 2: The Paper Experience**
-   - Configure Tiptap with markdown parsing and seamless line/margin styling.
-   - Implement "instant write" autofocus on page load.
-   - Create subtle paper textures and responsive line rulings.
-   - Build contextual floating bubble menu for formatting.
-3. **Phase 3: PWA & Offline Engine**
-   - Setup Angular Service Worker caching.
-   - Implement page turn / swipe gestures using Angular CDK or pointer events.
-   - Verify 100% offline functionality in Airplane mode.
-4. **Phase 4: Backend Infrastructure & Auth**
-   - Setup NestJS with Neon PostgreSQL and TypeORM migrations.
-   - Implement secure registration/login with HttpOnly cookie JWT tokens.
-   - Configure Swagger/OpenAPI documentation.
-5. **Phase 5: Background Synchronization**
-   - Implement client sync queue in Dexie with exponential backoff.
-   - Implement server idempotent batch sync endpoint.
-   - Implement conflict preservation strategy.
-6. **Phase 6: Media Storage & Tactile Polish**
-   - Cloudflare R2 presigned URL generation and direct client uploads.
-   - Polish haptics, sound effects (optional subtle paper flip), and keyboard shortcuts.
+### 5.1 Local-First Principles
+- **Zero Save Latency**: Writing commits directly to Dexie.js (IndexedDB). No network call can ever block keystrokes or UI responsiveness.
+- **Client-Generated IDs**: Entity IDs are generated client-side using **UUIDv7** (time-sortable, globally unique).
+- **Monotonic Revisions**: Every edit increments `revision` and updates `client_updated_at`.
+- **Idempotent Sync Protocol**: Sync batches must be re-runnable without duplicate records or side effects.
+- **Conflict Handling**: Never overwrite user writing silently. If revisions diverge on the server, a local "conflict copy" entry is preserved.
+- **Decoupled Media**: Text saves are independent of attachments. Cloudflare R2 presigned URLs handle binary media out-of-band.
+
+---
+
+## 6. Privacy & Security Rules
+
+1. **Zero Journal Content in Logs**:
+   - Backend logging middleware must **never log request bodies** or database content containing journal titles, body content, or user reflections.
+   - Sentry error monitoring must sanitize and redact all user text blocks.
+2. **Cookie-Based Authentication**:
+   - JWT Access (15m) and Refresh (7d) tokens must reside in `HttpOnly`, `Secure`, `SameSite=Strict` cookies.
+   - Never store auth tokens in `localStorage` or `sessionStorage`.
+3. **Data Erasure**:
+   - Account deletion must trigger cascading hard-deletes of all journals, pages, tags, and associated media files in R2.
+
+---
+
+## 7. Phased Implementation Roadmap
+
+- [ ] **Phase 0: Product Definition & Documentation** *(Completed)*
+- [ ] **Phase 1: Architecture, Shared Contracts & Dexie Setup**
+  - Monorepo structure, shared TypeScript DTOs, Dexie database schemas, UUIDv7 utilities.
+- [ ] **Phase 2: Tactile Paper UI & Tiptap Editor**
+  - Angular 19 standalone setup, Tailwind paper design tokens, serif typography, Tiptap paper configuration, instant autofocus.
+- [ ] **Phase 3: PWA Shell, Gestures & Offline Engine**
+  - Service Worker configuration, touch swipe gestures, keyboard shortcuts, reduced-motion fallback.
+- [ ] **Phase 4: NestJS Backend, PostgreSQL & Auth**
+  - Neon PostgreSQL setup, TypeORM entities/migrations, cookie JWT auth, zero-log middleware, Swagger docs.
+- [ ] **Phase 5: Background Sync & Conflict Engine**
+  - Client sync queue, server idempotent batch processor, conflict copy preservation.
+- [ ] **Phase 6: Data Export, Media & Polish**
+  - Markdown/JSON export, Cloudflare R2 uploads, account deletion workflow, tactile visual polish.
